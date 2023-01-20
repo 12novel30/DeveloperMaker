@@ -1,14 +1,12 @@
 package com.fastcampus.programming.dmaker.dto;
 
-import com.fastcampus.programming.dmaker.entity.Developer;
-import com.fastcampus.programming.dmaker.type.DeveloperLevel;
-import com.fastcampus.programming.dmaker.type.DeveloperSkillType;
+import com.fastcampus.programming.dmaker.code.DeveloperLevel;
+import com.fastcampus.programming.dmaker.code.DeveloperSkillType;
 import lombok.*;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 public class EditDeveloper {
 
@@ -17,9 +15,9 @@ public class EditDeveloper {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    @ToString // controller에서 쉽게 하기위함
+    @ToString
     public static class Request{
-        @NotNull // validation
+        @NotNull
         private DeveloperLevel developerLevel;
         @NotNull
         private DeveloperSkillType developerSkillType;
@@ -27,7 +25,7 @@ public class EditDeveloper {
         @Min(0)
         @Max(20)
         private Integer experienceYears;
-// 수정할 필요 없는 정보
+        // 수정할 필요 없는 정보
 //        @NotNull
 //        @Size(min = 3, max = 50, message = "memberId size must be 3~50")
 //        private String memberId;

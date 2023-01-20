@@ -1,8 +1,8 @@
 package com.fastcampus.programming.dmaker.dto;
 
 import com.fastcampus.programming.dmaker.entity.Developer;
-import com.fastcampus.programming.dmaker.type.DeveloperLevel;
-import com.fastcampus.programming.dmaker.type.DeveloperSkillType;
+import com.fastcampus.programming.dmaker.code.DeveloperLevel;
+import com.fastcampus.programming.dmaker.code.DeveloperSkillType;
 import lombok.*;
 
 import javax.validation.constraints.Max;
@@ -17,7 +17,7 @@ public class CreateDeveloper {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    @ToString // controller에서 쉽게 하기위함
+    @ToString // controller 에서 쉽게 하기위함
     public static class Request{
         @NotNull // validation
         private DeveloperLevel developerLevel;

@@ -7,10 +7,10 @@ import com.fastcampus.programming.dmaker.dto.DeveloperDto;
 import com.fastcampus.programming.dmaker.dto.EditDeveloper;
 import com.fastcampus.programming.dmaker.entity.Developer;
 import com.fastcampus.programming.dmaker.entity.RetiredDeveloper;
-import com.fastcampus.programming.dmaker.exception.DmakerException;
+import com.fastcampus.programming.dmaker.exception.DMakerException;
 import com.fastcampus.programming.dmaker.repository.DeveloperRepository;
 import com.fastcampus.programming.dmaker.repository.RetiredDeveloperRepository;
-import com.fastcampus.programming.dmaker.type.DeveloperLevel;
+import com.fastcampus.programming.dmaker.code.DeveloperLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,27 +19,25 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.fastcampus.programming.dmaker.exception.DmakerErrorCode.*;
+import static com.fastcampus.programming.dmaker.exception.DMakerErrorCode.*;
 
 @Service
-@RequiredArgsConstructor // repository를 인젝션 할 필요 없음
-// 생성자도 필요없음
-
+@RequiredArgsConstructor
 public class DMakerService {
     private final DeveloperRepository developerRepository;
     private final RetiredDeveloperRepository retiredDeveloperRepository;
 
-    @Transactional
+    @Transactional //DB 접근(수정)이 있으면 넣어주는 것이 좋음
     /* [Transactional 개념]
     * ACID - DB 구성 규칙(atomic, consistency, isolation, durability
     * - 스프링의 관리 방식
-    *   EntityManager를 불러와서, try-catch 문을 이용
+    *   EntityManager 를 불러와서, try-catch 문을 이용
     *   에러나면 rollback
     * -> annotation 기반 pointcut (AOP)
-    * -> 해당 함수들을 삭제하고 AOP로 관리*/
+    * -> 해당 함수들을 삭제하고 AOP 로 관리*/
     public CreateDeveloper.Response createDeveloper(CreateDeveloper.Request request){
-
         validateCreateDeveloperRequest(request);
+
         // business logic start
         Developer developer = Developer.builder()
                 .developerLevel(request.getDeveloperLevel())
@@ -53,13 +51,16 @@ public class DMakerService {
         developerRepository.save(developer);
         // business logic end
 
-        // transactional 이 있었던 위치
+        // (transactional 원래 함수가 있었던 위치)
 
         return CreateDeveloper.Response.fromEntity(developer);
     }
 
     private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
+        // try - catch 는 이제 잘 안함 - 성공에 관한 깔끔한 코드를 작성할 수 있음
+
         // business validation
+
         // 단축키로 중복되는 변수를 선언 -> extract 이후 사라짐
         // 서비스에 필요한 익셉션을 개별적으로 만들어주는 것이 좋음
         // 중복되는 함수는 extract
@@ -70,14 +71,14 @@ public class DMakerService {
         // Optional 사용 - ifPresent
         developerRepository.findByMemberId(request.getMemberId())
                 .ifPresent((developer -> {
-                    throw new DmakerException(DUPLICATED_MEMBER_ID);
+                    throw new DMakerException(DUPLICATED_MEMBER_ID);
                 }));
 
     }
 
     public List<DeveloperDto> getAllEmployedDevelopers() {
         return developerRepository.findDevelopersByStatusCodeEquals(StatusCode.EMPLOYED)
-                .stream()
+                .stream() // 컬렉션의 요소를 하나씩 참조, 람다식으로 처리하는 반복자
                 .map(DeveloperDto::fromEntity) // entity -> dto
                 .collect(Collectors.toList()); // 리스트로
     }
@@ -85,21 +86,27 @@ public class DMakerService {
     public DeveloperDetailDto getDeveloperDetail(String memberId) {
         return developerRepository.findByMemberId(memberId)
                 .map(DeveloperDetailDto::fromEntity)
-                //.get() 보다는
-                .orElseThrow(() -> new DmakerException(NO_DEVELOPER));
+                //.get() 보다는 에러처리가 좋다
+                .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
     }
 
     @Transactional
     public DeveloperDetailDto editDeveloper(String memberId, EditDeveloper.Request request) {
         validateEditDeveloperRequest(request, memberId);
 
-        Developer developer = developerRepository.findByMemberId(memberId).orElseThrow(
-                () -> new DmakerException(NO_DEVELOPER)
+        // 수정할 때는, entity 로 받아와서 set 으로 수정
+        Developer developer = developerRepository.findByMemberId(memberId)
+                .orElseThrow( () -> new DMakerException(NO_DEVELOPER)
         );
 
         developer.setDeveloperLevel(request.getDeveloperLevel());
         developer.setDeveloperSkillType(request.getDeveloperSkillType());
         developer.setExperienceYears(request.getExperienceYears());
+
+        // @Transactional 가 Dirty Checking 을 동작,
+        // 알아서 DB에 반영해주기 때문에
+        // 별도로 save 는 필요없다.
+        // ** save 는 create, delete 에서만 사용
 
         return DeveloperDetailDto.fromEntity(developer);
     }
@@ -107,7 +114,6 @@ public class DMakerService {
     private void validateEditDeveloperRequest(
             EditDeveloper.Request request,
             String memberId) {
-        // 서비스에 필요한 익셉션을 개별적으로 만들어주는 것이 좋음
         validateDeveloperLevel(
                 request.getDeveloperLevel(),
                 request.getExperienceYears()
@@ -118,28 +124,27 @@ public class DMakerService {
     private static void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
         if (developerLevel == DeveloperLevel.SENIOR
                 && experienceYears < 10){
-            throw new DmakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
         if (developerLevel == DeveloperLevel.JUNIOR
                 && (experienceYears < 4 ||
                 experienceYears > 10)) {
-            throw new DmakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
         if (developerLevel == DeveloperLevel.JUNIOR
                 && experienceYears > 4) {
-            throw new DmakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+            throw new DMakerException(LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
     }
 
-
-    @Transactional //DB 접근(수정)이 있으면 넣어주는 것이 좋음
+    @Transactional
     public DeveloperDetailDto deleteDeveloper(String memberId) {
         // 1. EMPLOYED -> RETIRED
         Developer developer = developerRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new DmakerException(NO_DEVELOPER));
+                .orElseThrow(() -> new DMakerException(NO_DEVELOPER));
         developer.setStatusCode(StatusCode.RETIRED);
 
-        if (developer != null) throw new DmakerException(NO_DEVELOPER);
+        if (developer != null) throw new DMakerException(NO_DEVELOPER);
 
         // 2. save into RetiredDeveloper
         RetiredDeveloper retiredDeveloper = RetiredDeveloper.builder()

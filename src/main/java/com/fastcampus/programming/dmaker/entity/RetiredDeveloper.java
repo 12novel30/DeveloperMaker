@@ -1,7 +1,5 @@
 package com.fastcampus.programming.dmaker.entity;
 
-import com.fastcampus.programming.dmaker.type.DeveloperLevel;
-import com.fastcampus.programming.dmaker.type.DeveloperSkillType;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -18,14 +16,15 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class RetiredDeveloper {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     protected Long id;
 
     private String memberId;
     private String name;
 
-    // @EnableJpaAuditing in DmakerApplication.java
     @CreatedDate
     private LocalDateTime createdAt;
 

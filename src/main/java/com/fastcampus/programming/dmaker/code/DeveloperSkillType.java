@@ -1,4 +1,4 @@
-package com.fastcampus.programming.dmaker.type;
+package com.fastcampus.programming.dmaker.code;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
