@@ -16,7 +16,7 @@ import java.util.List;
 // 생성자도 필요없음
 public class DMakerController {
 
-    private final DMakerService dMakerService;
+    private final DMakerService dMakerService; // [DI]
 
     @GetMapping("/developers")
     public List<DeveloperDto> getAllDevelopers() {
@@ -34,7 +34,7 @@ public class DMakerController {
 
     @GetMapping("/developers/{memberId}")
     public DeveloperDetailDto getDeveloperDetail(
-            @PathVariable String memberId
+            @PathVariable final String memberId // 입력받은 값은 바뀌지 않음 - final
     ) {
         log.info("GET /developers HTTP/1.1");
 
@@ -44,7 +44,7 @@ public class DMakerController {
     @PostMapping("/create-developers")
     public CreateDeveloper.Response createDevelopers(
             @Valid @RequestBody CreateDeveloper.Request request
-            // @Valid: for validation - 진입 전에 exception 발생
+            // @Valid: for [Validation] - 진입 전에 exception 발생
             // -> MethodArgumentNotValidException 에서 처리
             ) {
         log.info("request: {}", request); // dto 파일의 @ToString
@@ -57,7 +57,7 @@ public class DMakerController {
 
     @PutMapping("/developers/{memberId}")
     public DeveloperDetailDto editDeveloper(
-            @PathVariable String memberId,
+            @PathVariable final String memberId, // for [Data binding]
             @Valid @RequestBody EditDeveloper.Request request
     ) {
         log.info("GET /developers HTTP/1.1");
@@ -67,7 +67,7 @@ public class DMakerController {
 
     @DeleteMapping()
     public DeveloperDetailDto deleteDeveloper(
-            @PathVariable String memberId
+            @PathVariable final String memberId
     ){
         return dMakerService.deleteDeveloper(memberId);
     }

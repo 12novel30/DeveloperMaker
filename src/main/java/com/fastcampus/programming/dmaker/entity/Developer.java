@@ -3,6 +3,7 @@ package com.fastcampus.programming.dmaker.entity;
 import com.fastcampus.programming.dmaker.code.StatusCode;
 import com.fastcampus.programming.dmaker.code.DeveloperLevel;
 import com.fastcampus.programming.dmaker.code.DeveloperSkillType;
+import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -53,4 +54,6 @@ public class Developer {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    // entity 에 메소드를 두는 것은 좋지 못함
 }

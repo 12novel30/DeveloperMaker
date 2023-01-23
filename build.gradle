@@ -25,7 +25,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok' // mustbe
 	runtimeOnly 'com.h2database:h2' // for embedded database - memory DB
 	annotationProcessor 'org.projectlombok:lombok' // mustbe
-	testImplementation 'org.springframework.boot:spring-boot-starter-test' // mustbe
+	testImplementation 'org.springframework.boot:spring-boot-starter-test' // junit5
 }
 
 tasks.named('test') {
